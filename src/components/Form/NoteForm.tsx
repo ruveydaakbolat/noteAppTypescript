@@ -6,12 +6,19 @@ import { Tag } from "../../types";
 import { CreateNoteProps } from "./CreateNote";
 import { v4 } from "uuid";
 
-const NoteForm = ({ onSubmit, availableTags, createTag }: CreateNoteProps) => {
+const NoteForm = ({
+  onSubmit,
+  availableTags,
+  createTag,
+  markdown = "",
+  tags = [],
+  title = "",
+}: CreateNoteProps) => {
   const navigate = useNavigate();
 
   const titleRef = useRef<HTMLInputElement>(null);
   const markdownRef = useRef<HTMLTextAreaElement>(null);
-  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  const [selectedTags, setSelectedTags] = useState<Tag[]>(tags);
 
   // form gönderilir
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -23,6 +30,8 @@ const NoteForm = ({ onSubmit, availableTags, createTag }: CreateNoteProps) => {
       markdown: markdownRef.current!.value,
       tags: selectedTags,
     });
+
+    navigate(-1);
   };
 
   return (
@@ -32,7 +41,12 @@ const NoteForm = ({ onSubmit, availableTags, createTag }: CreateNoteProps) => {
           <Col>
             <Form.Group controlId="title">
               <Form.Label>Başlık</Form.Label>
-              <Form.Control ref={titleRef} required className="shadow" />
+              <Form.Control
+                defaultValue={title}
+                ref={titleRef}
+                required
+                className="shadow"
+              />
             </Form.Group>
           </Col>
           <Col>
@@ -40,18 +54,17 @@ const NoteForm = ({ onSubmit, availableTags, createTag }: CreateNoteProps) => {
               <Form.Label>Etiketler</Form.Label>
               <ReactSelect
                 value={selectedTags}
-
                 // elemanlar silindiğinde state i günceller
                 // @ts-ignore
                 onChange={(all_tags) => setSelectedTags(all_tags)}
-
                 onCreateOption={(text) => {
                   const newTag: Tag = { label: text, value: v4() };
                   // local'e yeni etiketi kaydet
-                  createTag(newTag)
+                  createTag(newTag);
                   // State i güncelle
                   setSelectedTags([...selectedTags, newTag]);
                 }}
+                options={availableTags}
                 isMulti
                 className="shadow"
               />
@@ -62,6 +75,7 @@ const NoteForm = ({ onSubmit, availableTags, createTag }: CreateNoteProps) => {
         <Form.Group controlId="markdown" className="my-4">
           <Form.Label>İçerik</Form.Label>
           <Form.Control
+            defaultValue={markdown}
             as={"textarea"}
             ref={markdownRef}
             required
